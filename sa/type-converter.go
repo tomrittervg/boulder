@@ -32,9 +32,9 @@ func (tc BoulderTypeConverter) ToDb(val interface{}) (interface{}, error) {
 		}
 		return string(jsonBytes), nil
 	case core.AcmeStatus:
-		return string(t), nil
+		return string(val.(core.AcmeStatus)), nil
 	case core.OCSPStatus:
-		return string(t), nil
+		return string(val.(core.OCSPStatus)), nil
 	default:
 		return val, nil
 	}
@@ -74,7 +74,10 @@ func (tc BoulderTypeConverter) FromDb(target interface{}) (gorp.CustomScanner, b
 		return gorp.CustomScanner{Holder: new(string), Target: target, Binder: binder}, true
 	case *core.AcmeStatus:
 		binder := func(holder, target interface{}) error {
-			s := holder.(*string)
+			s, ok := holder.(*string)
+			if !ok {
+				return errors.New("FromDb: Unable to convert *string")
+			}
 			st := target.(*core.AcmeStatus)
 			*st = core.AcmeStatus(*s)
 			return nil
@@ -82,7 +85,10 @@ func (tc BoulderTypeConverter) FromDb(target interface{}) (gorp.CustomScanner, b
 		return gorp.CustomScanner{Holder: new(string), Target: target, Binder: binder}, true
 	case *core.OCSPStatus:
 		binder := func(holder, target interface{}) error {
-			s := holder.(*string)
+			s, ok := holder.(*string)
+			if !ok {
+				return errors.New("FromDb: Unable to convert *string")
+			}
 			st := target.(*core.OCSPStatus)
 			*st = core.OCSPStatus(*s)
 			return nil
